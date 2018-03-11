@@ -26,6 +26,7 @@ install:
   - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
   - arduino --install-boards esp8266:esp8266
 # install esp32
+  - pushd .
   - mkdir -p ~/Arduino/hardware/espressif
   - cd ~/Arduino/hardware/espressif
   - git clone https://github.com/espressif/arduino-esp32.git esp32
@@ -33,7 +34,8 @@ install:
   - git submodule update --init --recursive
   - cd tools
   - python2 get.py
-
+  - popd
+  
 script:
   - "echo $PWD"
   - "echo $HOME"
