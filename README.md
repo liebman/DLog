@@ -1,6 +1,7 @@
 # DLog - an extensible debug logging system
 
-DLog is a robust, extensible debug logging system supporting multiple log destinations.
+DLog is a robust, extensible debug logging system supporting multiple log destinations. While it's mainly
+intended for ESP8266 and ESP32 it will work on others if C++ STL support is included, on AVR add ArduinoSTL.
 
 ### Features
 
