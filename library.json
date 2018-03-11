@@ -1,0 +1,19 @@
+{
+	"name": "DLog",
+	"keywords": "logging, debug, log, log levels, AVR, ESP8266",
+	"description": "Debug logging framework supporting multiple log levels",
+	"version": "1.0.0",
+	"authors": {
+		"name": "Christopher B. Liebman",
+		"url": "https://github.com/liebman",
+		"maintainer": true
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/liebman/DLog"
+	},
+	"homepage": "https://github.com/liebman/DLog/",
+	"frameworks": ["arduino"],
+	"platforms": "*",
+	"examples": "examples/*/*.ino"
+}
