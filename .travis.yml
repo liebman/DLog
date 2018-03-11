@@ -8,13 +8,13 @@ branches:
 
 env:
   global:
-     - PRETTYNAME="DLog - an extensible debug logging system"
+     - PRETTYNAME="DLog"
 
 before_install:
    - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
 
 install:
-   - arduino --install-library "ESP8266WiFi","ArduinoSTL"
+   - arduino --install-library "ArduinoSTL"
 
 script:
    - build_main_platforms

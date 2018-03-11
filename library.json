@@ -1,6 +1,6 @@
 {
 	"name": "DLog",
-	"keywords": "logging, debug, log, log levels, AVR, ESP8266",
+	"keywords": "logging, debug, log, log levels, AVR, ESP8266, ESP32",
 	"description": "Debug logging framework supporting multiple log levels",
 	"version": "1.0.0",
 	"authors": {
