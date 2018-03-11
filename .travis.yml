@@ -41,7 +41,7 @@ script:
   - "echo $HOME"
   - "ls $PWD"
   - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - build_examples
+  - build_boards
 
 #after_success:
 #  - bash <(curl -s https://codecov.io/bash)
