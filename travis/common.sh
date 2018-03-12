@@ -1,27 +1,5 @@
 #!/bin/bash
 
-function build_boards()
-{
-    local exit_code=0;
-    echo
-    echo "-------------- esp8266 -----------------"
-    echo
-    arduino --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
-    build_examples
-    if [ $? -ne 0 ]; then
-        exit_code=1
-    fi
-    echo
-    echo "-------------- esp32 -----------------"
-    echo
-    arduino --board espressif:esp32:ESP32_DEV:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
-    if [ $? -ne 0 ]; then
-        exit_code=1
-    fi
-    build_examples
-    return $exit_code
-}
-
 function build_examples()
 {
   # track the exit code for this platform
