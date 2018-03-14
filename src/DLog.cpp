@@ -19,8 +19,7 @@
  *      Author: chris.l
  */
 #include "DLog.h"
-#include "DLogPrintWriter.h"
-#include "DLogTCPWriter.h"
+#include "DLogWriter.h"
 
 DLog& DLog::getLog()
 {
