@@ -7,13 +7,13 @@ intended for ESP8266 and ESP32 it may work on others if sufficient C++ STL suppo
 
 ### Features
 
- * Multiple "writers" allow output to Serial and Network destinations
+ * Multiple "writers" allow output to Serial and Network destinations with addon DLogNet library
  * Configurable format.
 
 ### Implemnented Writers
 
  * `DLogPrintWriter` - sends log lines to any object inheriting from `Print`.
- * `DLogTCPWriter` - sends log lines to remote systems.
+ * `DLogTCPWriter` - sends log lines to remote systems (with DLogNet)
 
 ### Future Writers
 
