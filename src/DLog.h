@@ -26,7 +26,6 @@
 #include <string>
 #include <map>
 #include <stdarg.h>
-#include <functional>
 #include <vector>
 
 #include "DLogLevel.h"
@@ -39,6 +38,7 @@
 
 #if defined(ESP8266) || defined(ESP_PLATFORM)
 // these have support for std::function
+#include <functional>
 typedef std::function<void(DLogBuffer& buffer, DLogLevel level)> DLogPrePost;
 #else
 // default to no std::function support! (like avr currently)
