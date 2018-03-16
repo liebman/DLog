@@ -19,14 +19,9 @@
  *      Author: chris.l
  */
 #include "DLog.h"
+#include "DLogLevelMap.h"
+#include "DLogWriterList.h"
 #include "DLogWriter.h"
-
-struct dlog_level_entry
-{
-    char*     tag;
-    DLogLevel level;
-};
-
 
 DLog& DLog::getLog()
 {
@@ -38,16 +33,17 @@ void DLog::begin(DLogWriter* writer)
 {
     if (writer != nullptr)
     {
-        _writers.push_back(writer);
+        _writers.addWriter(writer);
     }
 }
 
 DLog::DLog() :
         _level(DLOG_LEVEL_INFO),
-        _level_entry_count(0),
-        _level_entry_max(0),
-        _level_entries(nullptr),
-        _formatter(nullptr)
+        _levels(nullptr),
+        _writers(),
+        _formatter(nullptr),
+        pre_func(nullptr),
+        post_func(nullptr)
 {
 #ifdef ESP_PLATFORM
         _lock = xSemaphoreCreateRecursiveMutex();
@@ -61,11 +57,6 @@ DLog::~DLog()
 
 void DLog::end()
 {
-    for(DLogWriter* w : _writers)
-    {
-        delete w;
-    }
-    _writers.clear();
     delete _formatter;
     _formatter = nullptr;
 }
@@ -77,14 +68,7 @@ void DLog::setLevel(DLogLevel level)
 
 void DLog::setLevel(const char* tag, DLogLevel level)
 {
-    DLogLevelEntry* entry = find(tag);
-    if (entry != nullptr)
-    {
-        entry->level = level;
-        return;
-    }
-
-    insert(tag, level);
+    _levels->setLevel(tag, level);
 }
 
 void DLog::setPreFunc(DLogPrePost func)
@@ -133,12 +117,7 @@ void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
         return;
     }
 
-    DLogLevel limit = _level;
-    DLogLevelEntry* entry = find(tag);
-    if (entry != nullptr)
-    {
-        limit = entry->level;
-    }
+    DLogLevel limit = _levels->getLevel(tag, _level);
 
     if (level > limit)
     {
@@ -173,47 +152,10 @@ void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
 
     _formatter->end(_buffer);
 
-    for(DLogWriter* w : _writers)
-    {
-        w->write(_buffer.getBuffer());
-    }
+    _writers.write(_buffer.getBuffer());
+
     unlock();
 }
 
 template void DLog::print<const char*>(const char* tag, DLogLevel level, const char* fmt, ...);
 template void DLog::print<const __FlashStringHelper*>(const char* tag, DLogLevel level, const __FlashStringHelper* fmt, ...);
-
-DLogLevelEntry* DLog::find(const char* tag)
-{
-    for(size_t i = 0; i < _level_entry_count; ++i)
-    {
-        if (strcmp(tag, _level_entries[i].tag) == 0)
-        {
-            return &(_level_entries[i]);
-        }
-    }
-    return nullptr;
-}
-
-void DLog::insert(const char* tag, DLogLevel level)
-{
-    // insure array is big enough.
-    if (_level_entry_count == _level_entry_max)
-    {
-        size_t size = _level_entry_max + DLOG_LEVEL_ENTRY_INCREMENT;
-        DLogLevelEntry* new_entries = (DLogLevelEntry*)realloc((void*)_level_entries, size * sizeof(DLogLevelEntry));
-        if (new_entries == nullptr)
-        {
-            //
-            // we silently ignore level specification on allocation failure
-            // TODO: do something other than silently fail
-            //
-            return;
-        }
-        _level_entries = new_entries;
-        _level_entry_max = size;
-    }
-    _level_entries[_level_entry_count].tag = strdup(tag);
-    _level_entries[_level_entry_count].level = level;
-    ++_level_entry_count;
-}

@@ -9,7 +9,7 @@
 #define DLOGLEVELMAP_H_
 
 #include "DLogLevel.h"
-#include <sys/types.h>
+#include <stddef.h>
 
 typedef struct dlog_level_entry
 {

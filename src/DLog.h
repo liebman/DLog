@@ -24,12 +24,13 @@
 
 #include "Print.h"
 #include <stdarg.h>
-#include <vector>
 
 #include "DLogLevel.h"
 #include "DLogFormatter.h"
 #include "DLogBuffer.h"
 #include "DLogWriter.h"
+#include "DLogWriterList.h"
+#include "DLogLevelMap.h"
 
 #define LOG_MAX_SIZE 80
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
@@ -42,9 +43,6 @@ typedef std::function<void(DLogBuffer& buffer, DLogLevel level)> DLogPrePost;
 // default to no std::function support! (like avr currently)
 typedef void (*DLogPrePost)(DLogBuffer& buffer, DLogLevel level);
 #endif
-
-#define DLOG_LEVEL_ENTRY_INCREMENT 10
-typedef struct dlog_level_entry DLogLevelEntry;
 
 class DLog
 {
@@ -90,15 +88,8 @@ private:
     DLogBuffer                       _buffer;
     DLogLevel                        _level;      // default log level
 
-    // manage LogLevel list
-    size_t _level_entry_count; // count of items
-    size_t _level_entry_max;   // max items that fit in current size
-    DLogLevelEntry* _level_entries;
-
-    DLogLevelEntry* find(const char* tag);
-    void insert(const char* tag, DLogLevel level);
-
-    std::vector<DLogWriter*>         _writers;
+    DLogLevelMap*                    _levels;
+    DLogWriterList                   _writers;
     DLogFormatter*                   _formatter;
 
     DLogPrePost pre_func;
