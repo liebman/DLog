@@ -17,6 +17,8 @@ public:
     virtual ~DLogWriter();
 
     virtual void write(const char* message) = 0;
+    virtual inline bool isList() {return false;}
+    virtual void addWriter(DLogWriter* writer) {(void)writer;} // only called when isList() is true!
 };
 
 #endif /* DLOGWRITER_H_ */

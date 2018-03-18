@@ -33,7 +33,24 @@ void DLog::begin(DLogWriter* writer)
 {
     if (writer != nullptr)
     {
-        _writers.addWriter(writer);
+        if (_writers == nullptr)
+        {
+            // just a single writer.
+            _writers = writer;
+        }
+        else if (_writers->isList())
+        {
+            // we already have a writer list so just add
+            ((DLogWriterList*)_writers)->addWriter(writer);
+        }
+        else
+        {
+            // Swap the single writer with a writer list
+            DLogWriterList* list = new DLogWriterList();
+            list->addWriter(_writers);
+            list->addWriter(writer);
+            _writers = list;
+        }
     }
 }
 
@@ -68,6 +85,10 @@ void DLog::setLevel(DLogLevel level)
 
 void DLog::setLevel(const char* tag, DLogLevel level)
 {
+    if (_levels == nullptr)
+    {
+        _levels = new DLogLevelMap();
+    }
     _levels->setLevel(tag, level);
 }
 
@@ -109,15 +130,17 @@ void DLog::unlock()
 template <class F>
 void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
 {
-    //
-    // if no writer method then just return, logging has not been started.
-    //
-    if (_writers.empty())
+    if (_writers == nullptr)
     {
         return;
     }
 
-    DLogLevel limit = _levels->getLevel(tag, _level);
+
+    DLogLevel limit = _level;
+    if (_levels != nullptr)
+    {
+        limit = _levels->getLevel(tag, _level);
+    }
 
     if (level > limit)
     {
@@ -152,7 +175,7 @@ void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
 
     _formatter->end(_buffer);
 
-    _writers.write(_buffer.getBuffer());
+    _writers->write(_buffer.getBuffer());
 
     unlock();
 }

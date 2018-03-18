@@ -9,6 +9,7 @@
 #define DLOGBUFFER_H_
 
 #include "Arduino.h"
+#include <stdarg.h>
 
 class DLogBuffer
 {
@@ -27,8 +28,8 @@ private:
     int   _buffer_size;
     int   _len;
 
-    int _vsnprintf(char* buf, int size, const char* fmt, va_list ap);
-    int _vsnprintf(char* buf, int size, const __FlashStringHelper* fmt, va_list ap);
+    int _vsnprintf(char* buf, size_t size, const char* fmt, va_list ap);
+    int _vsnprintf(char* buf, size_t size, const __FlashStringHelper* fmt, va_list ap);
 };
 
 #endif /* DLOGBUFFER_H_ */

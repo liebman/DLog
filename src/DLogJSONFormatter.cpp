@@ -7,10 +7,8 @@
 
 #include <DLogJSONFormatter.h>
 
-DLogJSONFormatter::DLogJSONFormatter(DLogJSONFunc json_func, bool pretty) : _json_func(json_func), _pretty(pretty)
+DLogJSONFormatter::DLogJSONFormatter(DLogJSONFunc json_func, bool pretty) : _json_func(json_func), _pretty(pretty), _first_item(false)
 {
-    _pre_line  = pretty ? "  " : "";
-    _post_line = pretty ? "\n" : "";
 }
 
 DLogJSONFormatter::DLogJSONFormatter(DLogJSONFunc json_func) : DLogJSONFormatter(json_func, false)
@@ -31,44 +29,81 @@ DLogJSONFormatter::~DLogJSONFormatter()
 
 void DLogJSONFormatter::start(DLogBuffer& buffer)
 {
-    buffer.printf(F("{%s"), _post_line);
-}
-
-void DLogJSONFormatter::startContents(DLogBuffer& buffer, const char* tag, DLogLevel level)
-{
-    buffer.printf(F("%s\"name\":\"%s\",%s"), _pre_line, tag, _post_line);
-    buffer.printf(F("%s\"level\":\"%c\",%s"), _pre_line, levels[level], _post_line);
-    buffer.printf(F("%s\"message\":\""), _pre_line);
-}
-
-void DLogJSONFormatter::endContents(DLogBuffer& buffer, const char* tag, DLogLevel level)
-{
-    (void)tag;
-    (void)level;
-    buffer.printf(F("\""));
-    if (_json_func)
-    {
-        buffer.printf(F(",%s"), _post_line);
-        _json_func(buffer, _pre_line, _post_line);
-    }
+    buffer.printf(F("{"));
+    _first_item = true;
 }
 
 void DLogJSONFormatter::format(DLogBuffer& buffer, const char* tag, DLogLevel level, const char* fmt, va_list ap)
 {
-    startContents(buffer, tag, level);
-    buffer.vprintf(fmt, ap);
-    endContents(buffer, tag, level);
+    addItem(buffer, "name", tag);
+    addItem(buffer, "level", levels[level]);
+    addItem(buffer, "message", fmt, ap);
+    if (_json_func)
+    {
+        _json_func(buffer, *this);
+    }
 }
 
 void DLogJSONFormatter::format(DLogBuffer& buffer, const char* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap)
 {
-    startContents(buffer, tag, level);
-    buffer.vprintf(fmt, ap);
-    endContents(buffer, tag, level);
+    addItem(buffer, "name", tag);
+    addItem(buffer, "level", levels[level]);
+    addItem(buffer, "message", fmt, ap);
+    if (_json_func)
+    {
+        _json_func(buffer, *this);
+    }
 }
 
 void DLogJSONFormatter::end(DLogBuffer& buffer)
 {
-   buffer.printf(F("%s}\n"), _post_line);
+   buffer.printf(F("%s}\n"), _pretty ? "\n" : "");
 }
 
+void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, const char value)
+{
+    // if its not the first item we need to add a comma (,) and a newline if also pretty
+    if (!_first_item)
+    {
+        buffer.printf(F(",%s"), _pretty ? "\n" : "");
+    }
+    else
+    {
+        // not the first item anymore!
+        _first_item = false;
+    }
+    buffer.printf(F("%s\"%s\":\"%c\""), _pretty ? "  " : "", name, value);
+}
+
+void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    addItem(buffer, name, fmt, ap);
+    va_end(ap);
+}
+
+void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, const __FlashStringHelper* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    addItem(buffer, name, fmt, ap);
+    va_end(ap);
+}
+
+template<class F>void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, F fmt, va_list ap)
+{
+    // if its not the first item we need to add a comma (,) and a newline if also pretty
+    if (!_first_item)
+    {
+        buffer.printf(F(",%s"), _pretty ? "\n" : "");
+    }
+    else
+    {
+        // not the first item anymore!
+        _first_item = false;
+    }
+    buffer.printf(F("%s\"%s\":\""), _pretty ? "  " : "", name);
+    buffer.vprintf(fmt, ap);
+    buffer.printf(F("\""));
+}

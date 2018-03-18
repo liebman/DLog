@@ -96,13 +96,17 @@ void DLogBuffer::vprintf(F fmt, va_list ap)
 template void DLogBuffer::vprintf<const char*>(const char* fmt, va_list ap);
 template void DLogBuffer::vprintf<const __FlashStringHelper*>(const __FlashStringHelper* fmt, va_list ap);
 
-int DLogBuffer::_vsnprintf(char* buf, int size, const char* fmt, va_list ap)
+int DLogBuffer::_vsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
 {
     return vsnprintf(buf, size, fmt, ap);
 }
 
-int DLogBuffer::_vsnprintf(char* buf, int size, const __FlashStringHelper* fmt, va_list ap)
+int DLogBuffer::_vsnprintf(char* buf, size_t size, const __FlashStringHelper* fmt, va_list ap)
 {
     PGM_P fmt_p = reinterpret_cast<PGM_P>(fmt);
+#ifdef ARDUINO_ARCH_NRF5
+#define vsnprintf_P(s, n, f, ap) vsnprintf((s), (n), (f), (ap))
+#endif
+
     return vsnprintf_P(buf, size, fmt_p, ap);
 }

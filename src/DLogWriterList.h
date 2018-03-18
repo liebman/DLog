@@ -11,15 +11,15 @@
 #include "DLogWriter.h"
 #include <sys/types.h>
 
-class DLogWriterList
+class DLogWriterList : public DLogWriter
 {
 public:
     DLogWriterList();
     virtual ~DLogWriterList();
 
-    void addWriter(DLogWriter* writer);
-    void write(const char* message);
-    bool empty();
+    virtual void write(const char* message);
+    virtual inline bool isList() {return true;}
+    virtual void addWriter(DLogWriter* writer);
 
 private:
     size_t       _writers_count; // count of items

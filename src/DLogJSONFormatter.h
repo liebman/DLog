@@ -10,13 +10,14 @@
 
 #include "DLogFormatter.h"
 
+class DLogJSONFormatter;
 #if defined(ESP8266) || defined(ESP_PLATFORM)
 // these have support for std::function
 #include <functional>
-typedef std::function<void(DLogBuffer& buffer, const char* prefix, const char* postfix)> DLogJSONFunc;
+typedef std::function<void(DLogBuffer& buffer, DLogJSONFormatter& formatter)> DLogJSONFunc;
 #else
 // default to no std::function support! (like avr currently)
-typedef void (*DLogJSONFunc)(DLogBuffer& buffer, const char* prefix, const char* postfix);
+typedef void (*DLogJSONFunc)(DLogBuffer& buffer, DLogJSONFormatter& formatter);
 #endif
 
 class DLogJSONFormatter: public DLogFormatter
@@ -33,15 +34,17 @@ public:
     virtual void format(DLogBuffer& buffer, const char* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap);
     virtual void end(DLogBuffer& buffer);
 
-protected:
-    virtual void startContents(DLogBuffer& buffer, const char* tag, DLogLevel level);
-    virtual void endContents(DLogBuffer& buffer, const char* tag, DLogLevel level);
+    void addItem(DLogBuffer& buffer, const char* name, const char value);
+
+    void addItem(DLogBuffer& buffer, const char* name, const char* fmt, ...);
+    void addItem(DLogBuffer& buffer, const char* name, const __FlashStringHelper* fmt, ...);
+
+    template<class F> void addItem(DLogBuffer& buffer, const char* name, F fmt, va_list ap);
 
 private:
     DLogJSONFunc _json_func;
-    const char*  _pre_line;
-    const char*  _post_line;
     bool         _pretty;
+    bool         _first_item;
 };
 
 #endif /* DLOGJSONFORMATTER_H_ */

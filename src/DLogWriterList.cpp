@@ -54,8 +54,3 @@ void DLogWriterList::write(const char* message)
         _writers[i]->write(message);
     }
 }
-
-bool DLogWriterList::empty()
-{
-    return _writers_count == 0;
-}

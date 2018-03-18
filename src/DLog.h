@@ -36,7 +36,7 @@
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
 
 #if defined(ESP8266) || defined(ESP_PLATFORM)
-// these have support for std::function
+// these have support for std::function so we can use object methods as pre/post functions
 #include <functional>
 typedef std::function<void(DLogBuffer& buffer, DLogLevel level)> DLogPrePost;
 #else
@@ -89,7 +89,7 @@ private:
     DLogLevel                        _level;      // default log level
 
     DLogLevelMap*                    _levels;
-    DLogWriterList                   _writers;
+    DLogWriter*                      _writers;
     DLogFormatter*                   _formatter;
 
     DLogPrePost pre_func;
