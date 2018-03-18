@@ -14,6 +14,14 @@
 #define dbprintf(fmt, ...)
 #endif
 
+#if defined ESP8266
+//
+// Issues with PROGMEM and templates in gcc force us to redefine F()
+// keep these strings in flash
+#undef F
+#define F(s) (s)
+#endif
+
 #define DLOG_BUFFER_INCREMENT 80
 
 DLogBuffer::DLogBuffer()

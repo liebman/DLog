@@ -7,6 +7,14 @@
 
 #include <DLogJSONFormatter.h>
 
+#if defined ESP8266
+//
+// Issues with PROGMEM and templates in gcc force us to redefine F()
+// keep these strings in ram and not flash on ESP8266
+#undef F
+#define F(s) (s)
+#endif
+
 DLogJSONFormatter::DLogJSONFormatter(DLogJSONFunc json_func, bool pretty) : _json_func(json_func), _pretty(pretty), _first_item(false)
 {
 }
