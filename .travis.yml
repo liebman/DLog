@@ -50,5 +50,5 @@ script:
   - build_examples
   - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
   - build_examples
-  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
-  - build_examples
+#  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
+#  - build_examples
