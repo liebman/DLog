@@ -37,7 +37,8 @@ install:
   - popd
 # install nRF5 boards for micro::bit
   - arduino --pref "boardsmanager.additional.urls=https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
-  -  arduino --install-boards 
+  -  arduino --install-boards sandeepmistry:nRF5
+
 script:
   - "echo $PWD"
   - "echo $HOME"
