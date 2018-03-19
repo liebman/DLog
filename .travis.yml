@@ -36,8 +36,8 @@ install:
   - python2 get.py
   - popd
 # install nRF5 boards for micro::bit
-#  - arduino --pref "boardsmanager.additional.urls=https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
-#  -  arduino --install-boards sandeepmistry:nRF5
+  - arduino --pref "boardsmanager.additional.urls=https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
+  -  arduino --install-boards sandeepmistry:nRF5
 
 script:
   - "echo $PWD"
@@ -50,5 +50,5 @@ script:
   - build_examples
   - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
   - build_examples
-#  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
-#  - build_examples
+  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
+  - build_examples
