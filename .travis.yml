@@ -26,29 +26,29 @@ install:
   - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
   - arduino --install-boards esp8266:esp8266
 # install esp32
-  - pushd .
-  - mkdir -p ~/Arduino/hardware/espressif
-  - cd ~/Arduino/hardware/espressif
-  - git clone https://github.com/espressif/arduino-esp32.git esp32
-  - cd esp32
-  - git submodule update --init --recursive
-  - cd tools
-  - python2 get.py
-  - popd
+#  - pushd .
+#  - mkdir -p ~/Arduino/hardware/espressif
+#  - cd ~/Arduino/hardware/espressif
+#  - git clone https://github.com/espressif/arduino-esp32.git esp32
+#  - cd esp32
+#  - git submodule update --init --recursive
+#  - cd tools
+#  - python2 get.py
+#  - popd
 # install nRF5 boards for micro::bit
-  - arduino --pref "boardsmanager.additional.urls=https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
-  -  arduino --install-boards sandeepmistry:nRF5
+#  - arduino --pref "boardsmanager.additional.urls=https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
+#  -  arduino --install-boards sandeepmistry:nRF5
 
 script:
   - "echo $PWD"
   - "echo $HOME"
   - "ls $PWD"
   - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - arduino --board arduino:avr:uno
-  - build_examples
+#  - arduino --board arduino:avr:uno
+#  - build_examples
   - arduino --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
   - build_examples
-  - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
-  - build_examples
+#  - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
+#  - build_examples
 #  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
 #  - build_examples
