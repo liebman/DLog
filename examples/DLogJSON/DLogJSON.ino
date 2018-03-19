@@ -13,14 +13,9 @@ static const char* lTAG = "loop";
 //
 // We will register this function to add a timestamp field to the json  output.
 //
-void log_json(DLogBuffer& buffer, const char* preline, const char* postline)
+void log_json(DLogBuffer& buffer, DLogJSONFormatter& formatter)
 {
-    //
-    // preline and postline are empty strings unless we configured the json formatter
-    // with pretty enabled.  In that case preline has any needed indentation and postline
-    // will be an end of line.
-    //
-    buffer.printf(F("%s\"timestamp\":\"%010u\""), preline, millis(), postline);
+    formatter.addItem(buffer, "timestamp", F("%010u"), millis());
 }
 
 void setup()
