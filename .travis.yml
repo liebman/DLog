@@ -44,8 +44,8 @@ script:
   - "echo $HOME"
   - "ls $PWD"
   - source $TRAVIS_BUILD_DIR/travis/common.sh
-#  - arduino --board arduino:avr:uno
-#  - build_examples
+  - arduino --board arduino:avr:uno
+  - build_examples
   - arduino --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
   - build_examples
 #  - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
