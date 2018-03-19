@@ -6,6 +6,7 @@
  */
 
 #include "DLogLevelMap.h"
+#include "Arduino.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -19,7 +20,8 @@ DLogLevelMap::~DLogLevelMap()
 {
 }
 
-DLogLevel DLogLevelMap::getLevel(const char* tag, DLogLevel default_level)
+template<class T>
+DLogLevel DLogLevelMap::getLevel(T tag, DLogLevel default_level)
 {
     DLogLevelEntry* entry = find(tag);
     if (entry == nullptr)
@@ -30,7 +32,11 @@ DLogLevel DLogLevelMap::getLevel(const char* tag, DLogLevel default_level)
     return entry->level;
 }
 
-void DLogLevelMap::setLevel(const char* tag, DLogLevel level)
+template DLogLevel DLogLevelMap::getLevel<const char*>(const char* tag, DLogLevel default_level);
+template DLogLevel DLogLevelMap::getLevel<const __FlashStringHelper*>(const __FlashStringHelper* tag, DLogLevel default_level);
+
+template<class T>
+void DLogLevelMap::setLevel(T tag, DLogLevel level)
 {
     DLogLevelEntry* entry = find(tag);
     if (entry != nullptr)
@@ -42,11 +48,15 @@ void DLogLevelMap::setLevel(const char* tag, DLogLevel level)
     insert(tag, level);
 }
 
-DLogLevelEntry* DLogLevelMap::find(const char* tag)
+template void DLogLevelMap::setLevel<const char*>(const char* tag, DLogLevel level);
+template void DLogLevelMap::setLevel<const __FlashStringHelper*>(const __FlashStringHelper* tag, DLogLevel level);
+
+template<class T>
+DLogLevelEntry* DLogLevelMap::find(T tag)
 {
     for(size_t i = 0; i < _level_entry_count; ++i)
     {
-        if (strcmp(tag, _level_entries[i].tag) == 0)
+        if (cmp(_level_entries[i].tag, tag) == 0)
         {
             return &(_level_entries[i]);
         }
@@ -54,7 +64,8 @@ DLogLevelEntry* DLogLevelMap::find(const char* tag)
     return nullptr;
 }
 
-void DLogLevelMap::insert(const char* tag, DLogLevel level)
+template<class T>
+void DLogLevelMap::insert(T tag, DLogLevel level)
 {
     // insure array is big enough.
     if (_level_entry_count == _level_entry_max)
@@ -72,7 +83,34 @@ void DLogLevelMap::insert(const char* tag, DLogLevel level)
         _level_entries = new_entries;
         _level_entry_max = size;
     }
-    _level_entries[_level_entry_count].tag = strdup(tag);
+    _level_entries[_level_entry_count].tag = dup(tag);
     _level_entries[_level_entry_count].level = level;
     ++_level_entry_count;
+}
+
+char* DLogLevelMap::dup(const char* str)
+{
+    return strdup(str);
+}
+
+char* DLogLevelMap::dup(const __FlashStringHelper* str)
+{
+    int size = strlen_P((PGM_P)str);
+    char* snew = (char*)malloc(size+1);
+    if (snew != nullptr)
+    {
+        strcpy_P(snew, (PGM_P)str);
+    }
+
+    return snew;
+}
+
+int DLogLevelMap::cmp(const char* a, const char* b)
+{
+    return strcmp(a, b);
+}
+
+int DLogLevelMap::cmp(const char* a, const __FlashStringHelper* b)
+{
+    return strcmp_P(a, (PGM_P)b);
 }

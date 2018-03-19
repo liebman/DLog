@@ -63,6 +63,28 @@ void DLogJSONFormatter::format(DLogBuffer& buffer, const char* tag, DLogLevel le
     }
 }
 
+void DLogJSONFormatter::format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const char* fmt, va_list ap)
+{
+    addItem(buffer, "name", tag);
+    addItem(buffer, "level", levels[level]);
+    addItem(buffer, "message", fmt, ap);
+    if (_json_func)
+    {
+        _json_func(buffer, *this);
+    }
+}
+
+void DLogJSONFormatter::format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap)
+{
+    addItem(buffer, "name", tag);
+    addItem(buffer, "level", levels[level]);
+    addItem(buffer, "message", fmt, ap);
+    if (_json_func)
+    {
+        _json_func(buffer, *this);
+    }
+}
+
 void DLogJSONFormatter::end(DLogBuffer& buffer)
 {
    buffer.printf(F("%s}\n"), _pretty ? "\n" : "");
@@ -99,7 +121,7 @@ void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, const __Fl
     va_end(ap);
 }
 
-template<class F>void DLogJSONFormatter::addItem(DLogBuffer& buffer, const char* name, F fmt, va_list ap)
+template<class T, class F>void DLogJSONFormatter::addItem(DLogBuffer& buffer, T name, F fmt, va_list ap)
 {
     // if its not the first item we need to add a comma (,) and a newline if also pretty
     if (!_first_item)

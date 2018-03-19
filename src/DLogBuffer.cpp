@@ -14,14 +14,6 @@
 #define dbprintf(fmt, ...)
 #endif
 
-#if defined ESP8266
-//
-// Issues with PROGMEM and templates in gcc force us to redefine F()
-// keep these strings in flash
-#undef F
-#define F(s) (s)
-#endif
-
 #define DLOG_BUFFER_INCREMENT 80
 
 DLogBuffer::DLogBuffer()
@@ -104,6 +96,48 @@ void DLogBuffer::vprintf(F fmt, va_list ap)
 template void DLogBuffer::vprintf<const char*>(const char* fmt, va_list ap);
 template void DLogBuffer::vprintf<const __FlashStringHelper*>(const __FlashStringHelper* fmt, va_list ap);
 
+template<class T>
+void DLogBuffer::print(T str)
+{
+    int available =  _buffer_size-_len;
+
+    dbprintf("buffer_size: %d len: %d available: %d\n", _buffer_size, _len, available);
+
+    int size = _strlen(str) + 1; // include the '\0' in size
+
+    dbprintf("size: %d\n", size);
+
+    if (size > available)
+    {
+        int newsize = _buffer_size + ((size - _buffer_size) > DLOG_BUFFER_INCREMENT ? size+1 : DLOG_BUFFER_INCREMENT);
+
+        dbprintf("newsize: %d\n", newsize);
+
+        char* newbuf = (char*)realloc(_buffer, newsize);
+
+        if (newbuf == nullptr)
+        {
+            return;
+        }
+
+        _buffer      = newbuf;
+        _buffer_size = newsize;
+        available    = _buffer_size-_len;
+
+        dbprintf("new available: %d\n", available);
+
+    }
+
+    _strcpy(_buffer+_len, str);
+    _len += size-1; // exclude the '\0' from _len
+
+    dbprintf("buffer: '%s'\n", _buffer);
+
+}
+
+template void DLogBuffer::print<const char*>(const char* str);
+template void DLogBuffer::print<const __FlashStringHelper*>(const __FlashStringHelper* str);
+
 int DLogBuffer::_vsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
 {
     return vsnprintf(buf, size, fmt, ap);
@@ -112,9 +146,32 @@ int DLogBuffer::_vsnprintf(char* buf, size_t size, const char* fmt, va_list ap)
 int DLogBuffer::_vsnprintf(char* buf, size_t size, const __FlashStringHelper* fmt, va_list ap)
 {
     PGM_P fmt_p = reinterpret_cast<PGM_P>(fmt);
+
 #ifdef ARDUINO_ARCH_NRF5
 #define vsnprintf_P(s, n, f, ap) vsnprintf((s), (n), (f), (ap))
 #endif
 
     return vsnprintf_P(buf, size, fmt_p, ap);
+}
+
+char* DLogBuffer::_strcpy(char* dst, const char* src)
+{
+    return strcpy(dst, src);
+}
+
+char* DLogBuffer::_strcpy(char* dst, const __FlashStringHelper* src)
+{
+    PGM_P src_p = reinterpret_cast<PGM_P>(src);
+    return strcpy_P(dst, src_p);
+}
+
+int DLogBuffer::_strlen(const char* s)
+{
+    return strlen(s);
+}
+
+int DLogBuffer::_strlen(const __FlashStringHelper* str)
+{
+    PGM_P str_p = reinterpret_cast<PGM_P>(str);
+    return strlen_P(str_p);
 }

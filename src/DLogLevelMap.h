@@ -7,7 +7,7 @@
 
 #ifndef DLOGLEVELMAP_H_
 #define DLOGLEVELMAP_H_
-
+#include "WString.h"
 #include "DLogLevel.h"
 #include <stddef.h>
 
@@ -23,16 +23,21 @@ public:
     DLogLevelMap();
     virtual ~DLogLevelMap();
 
-    DLogLevel getLevel(const char* tag, DLogLevel default_level);
-    void setLevel(const char* tag, DLogLevel level);
+    template<class T>DLogLevel getLevel(T tag, DLogLevel default_level);
+    template<class T>void setLevel(T tag, DLogLevel level);
 
 private:
     size_t _level_entry_count; // count of items
     size_t _level_entry_max;   // max items that fit in current size
     DLogLevelEntry* _level_entries;
 
-    DLogLevelEntry* find(const char* tag);
-    void insert(const char* tag, DLogLevel level);
+    template<class T>DLogLevelEntry* find(T tag);
+    template<class T>void insert(T tag, DLogLevel level);
+    int cmp(const char* a, const char* b);
+    int cmp(const char* a, const __FlashStringHelper* b);
+
+    char* dup(const char* src);
+    char* dup(const __FlashStringHelper* src);
 };
 
 #endif /* DLOGLEVELMAP_H_ */

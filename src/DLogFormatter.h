@@ -21,13 +21,15 @@ public:
     virtual void start(DLogBuffer& buffer);
     virtual void format(DLogBuffer& buffer, const char* tag, DLogLevel level, const char* fmt, va_list ap);
     virtual void format(DLogBuffer& buffer, const char* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap);
+    virtual void format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const char* fmt, va_list ap);
+    virtual void format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap);
     virtual void end(DLogBuffer& buffer);
 
 protected:
     const char* levels = "0EWIDT0";
 
 private:
-    template<class F> void _format(DLogBuffer& buffer, const char* tag, DLogLevel level, F fmt, va_list ap);
+    template<class T, class F> void _format(DLogBuffer& buffer, T tag, DLogLevel level, F fmt, va_list ap);
 };
 
 #endif /* DLOGFORMATTER_H_ */

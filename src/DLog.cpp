@@ -83,7 +83,8 @@ void DLog::setLevel(DLogLevel level)
     _level = level;
 }
 
-void DLog::setLevel(const char* tag, DLogLevel level)
+template<class T>
+void DLog::setLevel(T tag, DLogLevel level)
 {
     if (_levels == nullptr)
     {
@@ -91,6 +92,9 @@ void DLog::setLevel(const char* tag, DLogLevel level)
     }
     _levels->setLevel(tag, level);
 }
+
+template void DLog::setLevel<const char*>(const char* tag, DLogLevel level);
+template void DLog::setLevel<const __FlashStringHelper*>(const __FlashStringHelper* tag, DLogLevel level);
 
 void DLog::setPreFunc(DLogPrePost func)
 {
@@ -127,8 +131,8 @@ void DLog::unlock()
 #endif
 }
 
-template <class F>
-void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
+template <class T, class F>
+void DLog::print(T tag, DLogLevel level, F fmt, ...)
 {
     if (_writers == nullptr)
     {
@@ -180,5 +184,7 @@ void DLog::print(const char* tag, DLogLevel level, F fmt, ...)
     unlock();
 }
 
-template void DLog::print<const char*>(const char* tag, DLogLevel level, const char* fmt, ...);
-template void DLog::print<const __FlashStringHelper*>(const char* tag, DLogLevel level, const __FlashStringHelper* fmt, ...);
+template void DLog::print<const char*, const char*>(const char* tag, DLogLevel level, const char* fmt, ...);
+template void DLog::print<const char*, const __FlashStringHelper*>(const char* tag, DLogLevel level, const __FlashStringHelper* fmt, ...);
+template void DLog::print<const __FlashStringHelper*, const char*>(const __FlashStringHelper* tag, DLogLevel level, const char* fmt, ...);
+template void DLog::print<const __FlashStringHelper*, const __FlashStringHelper*>(const __FlashStringHelper* tag, DLogLevel level, const __FlashStringHelper* fmt, ...);

@@ -32,14 +32,15 @@ public:
     virtual void start(DLogBuffer& buffer);
     virtual void format(DLogBuffer& buffer, const char* tag, DLogLevel level, const char* fmt, va_list ap);
     virtual void format(DLogBuffer& buffer, const char* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap);
+    virtual void format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const char* fmt, va_list ap);
+    virtual void format(DLogBuffer& buffer, const __FlashStringHelper* tag, DLogLevel level, const __FlashStringHelper* fmt, va_list ap);
     virtual void end(DLogBuffer& buffer);
 
     void addItem(DLogBuffer& buffer, const char* name, const char value);
-
     void addItem(DLogBuffer& buffer, const char* name, const char* fmt, ...);
     void addItem(DLogBuffer& buffer, const char* name, const __FlashStringHelper* fmt, ...);
 
-    template<class F> void addItem(DLogBuffer& buffer, const char* name, F fmt, va_list ap);
+    template<class T, class F> void addItem(DLogBuffer& buffer, T name, F fmt, va_list ap);
 
 private:
     DLogJSONFunc _json_func;

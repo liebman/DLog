@@ -52,28 +52,28 @@ public:
     void end();
 
     void setLevel(DLogLevel level);
-    void setLevel(const char* name, DLogLevel level);
+    template<class T> void setLevel(T name, DLogLevel level);
     void setPreFunc(DLogPrePost func);
     void setPostFunc(DLogPrePost func);
     void setFormatter(DLogFormatter* formatter);
 
-    template <class F, typename... Args> void error(const char* tag, F fmt, Args... args) {
+    template <class T, class F, typename... Args> void error(T tag, F fmt, Args... args) {
         print(tag, DLOG_LEVEL_ERROR, fmt, args...);
     }
 
-    template <class F, typename... Args> void warning(const char* tag, F fmt, Args... args) {
+    template <class T, class F, typename... Args> void warning(T tag, F fmt, Args... args) {
         print(tag, DLOG_LEVEL_WARNING, fmt, args...);
     }
 
-    template <class F, typename... Args> void info(const char* tag, F fmt, Args... args) {
+    template <class T, class F, typename... Args> void info(T tag, F fmt, Args... args) {
         print(tag, DLOG_LEVEL_INFO, fmt, args...);
     }
 
-    template <class F, typename... Args> void debug(const char* tag, F fmt, Args... args) {
+    template <class T, class F, typename... Args> void debug(T tag, F fmt, Args... args) {
         print(tag, DLOG_LEVEL_DEBUG, fmt, args...);
     }
 
-    template <class F, typename... Args> void trace(const char* tag, F fmt, Args... args) {
+    template <class T, class F, typename... Args> void trace(T tag, F fmt, Args... args) {
         print(tag, DLOG_LEVEL_TRACE, fmt, args...);
     }
 
@@ -101,7 +101,7 @@ private:
     void lock();
     void unlock();
 
-    template <class F> void print(const char* tag, DLogLevel level, F fmt, ...);
+    template <class T, class F> void print(T tag, DLogLevel level, F fmt, ...);
 };
 
 #endif /* DLOG_H_ */
