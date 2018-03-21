@@ -18,7 +18,7 @@ before_install:
 
   # Uncomment the following lines to get verbose output for debugging
   # 0 (minimum/default) - 2 (maximum) verbosity
-  #- set_script_verbosity 2
+  - set_script_verbosity 1
   # Turn on verbose output during compilation
   #- set_verbose_output_during_compilation "true"
 
@@ -50,6 +50,8 @@ before_install:
 
   # install the library from repo
   - install_library
+  - echo "install done"
 
 script:
+  - echo "starting tests"
   - build_sketch "${SKETCHBOOK_FOLDER}/libraries/MouseTo/examples" "esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE" "false" "newest"
