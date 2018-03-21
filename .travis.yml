@@ -1,58 +1,65 @@
 language: c
-sudo: false
-
-# Blacklist
-#branches:
-#  except:
-#    - gh-pages
+sudo: required
 
 env:
   global:
      - PRETTYNAME="DLog"
-
+     - APPLICATION_FOLDER="${HOME}/arduino-ide"
+     - SKETCHBOOK_FOLDER="${HOME}/arduino-sketchbook"
+     - EXAMPLES_DIR="${SKETCHBOOK_FOLDER}/libraries/DLog/examples"
+     - ESP8266_DEVICE="esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE"
+     - ESP32_DEVICE="espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info"
+     - AVR_DEVICE="arduino:avr:uno"
+     - NRF5_DEVICE="sandeepmistry:nRF5:BBCmicrobit"
+ 
 before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
-  - sleep 3
-  - export DISPLAY=:1.0
-  - wget http://downloads.arduino.cc/arduino-1.8.5-linux64.tar.xz
-  - tar xf arduino-1.8.5-linux64.tar.xz
-  - sudo mv arduino-1.8.5 /usr/local/share/arduino
-  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
-# need these for nRF5 (micro::bit)
+  # packages needed by micro::bit / nRF5
   - sudo dpkg --add-architecture i386
   - sudo apt-get update
   - sudo apt-get -y install libc6:i386 libstdc++6:i386 libncurses5:i386 libudev1:i386
 
-install:
-  - ln -s $PWD /usr/local/share/arduino/libraries/DLog
-  - arduino --pref "compiler.warning_level=all" --save-prefs
-# add extra board urls
-  - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json,https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
-# install esp8266
-  - arduino --install-boards esp8266:esp8266
-# install esp32
+  # setup arduino-ci-script
+  - git clone https://github.com/per1234/arduino-ci-script.git "${HOME}/scripts"
+  - cd "${HOME}/scripts"
+  # Get new tags from the remote
+  - git fetch --tags
+  # Checkout the latest tag
+  - git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+  - source "${HOME}/scripts/arduino-ci-script.sh"
+
+  # Uncomment the following lines to get verbose output for debugging
+  # 0 (minimum/default) - 2 (maximum) verbosity
+  #- set_script_verbosity 1
+  # Turn on verbose output during compilation
+  #- set_verbose_output_during_compilation "true"
+
+  # Check for library issues that don't affect compilation
+  - set_library_testing "true"
+
+  - set_application_folder "$APPLICATION_FOLDER"
+  - set_sketchbook_folder "$SKETCHBOOK_FOLDER"
+
+  - install_ide "1.8.5"
+
+  - install_package "arduino:avr"
+  - install_package "esp8266:esp8266" "http://arduino.esp8266.com/stable/package_esp8266com_index.json"
+  - install_package "sandeepmistry:nRF5" "https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json"
+
+  # install esp32 arduino code manually as there is no json for it yet
   - pushd .
-  - mkdir -p ~/Arduino/hardware/espressif
-  - cd ~/Arduino/hardware/espressif
-  - git clone https://github.com/espressif/arduino-esp32.git esp32
-  - cd esp32
+  - git clone https://github.com/espressif/arduino-esp32.git "${SKETCHBOOK_FOLDER}/hardware/espressif/esp32"
+  - cd "${SKETCHBOOK_FOLDER}/hardware/espressif/esp32"
   - git submodule update --init --recursive
   - cd tools
   - python2 get.py
   - popd
-# install nRF5 boards for micro::bit
-  -  arduino --install-boards sandeepmistry:nRF5
+
+  # install the library (DLog) from repo
+  - install_library
 
 script:
-  - "echo $PWD"
-  - "echo $HOME"
-  - "ls $PWD"
-  - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - arduino --board arduino:avr:uno
-  - build_examples
-  - arduino --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
-  - build_examples
-  - arduino --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
-  - build_examples
-  - arduino --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
-  - build_examples
+  - echo "starting tests"
+  - build_sketch "${EXAMPLES_DIR}" "${AVR_DEVICE}"     "false" "1.8.5"
+  - build_sketch "${EXAMPLES_DIR}" "${ESP8266_DEVICE}" "false" "1.8.5"
+  - build_sketch "${EXAMPLES_DIR}" "${ESP32_DEVICE}"   "false" "1.8.5"
+  - build_sketch "${EXAMPLES_DIR}" "${NRF5_DEVICE}"    "false" "1.8.5"
