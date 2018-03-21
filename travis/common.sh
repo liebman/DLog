@@ -28,7 +28,7 @@ function build_examples()
     # we have to avoid reading the exit code of local:
     # "when declaring a local variable in a function, the local acts as a command in its own right"
     local build_stdout
-    build_stdout=$(arduino -v --verbose-build --verify $sketch 2>&1)
+    build_stdout=$(arduino_cmd -v --verbose-build --verify $sketch 2>&1)
 
     # echo output if the build failed
     if [ $? -ne 0 ]; then
@@ -48,4 +48,12 @@ function build_examples()
   done
 
   return $exit_code
+}
+
+function arduino_cmd()
+{
+    readonly ARDUINO_CI_SCRIPT_ARDUINO_OUTPUT_FILTER_REGEX='(^\[SocketListener\(travis-job-*|^  *[0-9][0-9]*: [0-9a-g][0-9a-g]*|^dns\[query,[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*:[0-9][0-9]*, length=[0-9][0-9]*, id=|^dns\[response,[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*:[0-9][0-9]*, length=[0-9][0-9]*, id=|^questions:$|\[DNSQuestion@|^\.\]$|^\.\]\]$|^.\.\]$|^.\.\]\]$)'
+    
+    arduino -v --verbose-build "$@" | tr -Cd '[:print:]\n\t' | grep --extended-regexp --invert-match "$ARDUINO_CI_SCRIPT_ARDUINO_OUTPUT_FILTER_REGEX"; local -r theExitStatus="${PIPESTATUS[0]}"
+    return $theExitStatus;
 }

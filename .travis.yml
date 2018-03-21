@@ -1,58 +1,58 @@
 language: c
-sudo: required
+sudo: false
+
+# Blacklist
+#branches:
+#  except:
+#    - gh-pages
 
 env:
   global:
      - PRETTYNAME="DLog"
-     - APPLICATION_FOLDER="${HOME}/arduino-ide"
-     - SKETCHBOOK_FOLDER="${HOME}/arduino-sketchbook"
 
 before_install:
-  - git clone https://github.com/per1234/arduino-ci-script.git "${HOME}/scripts"
-  - cd "${HOME}/scripts"
-  # Get new tags from the remote
-  - git fetch --tags
-  # Checkout the latest tag
-  - git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-  - source "${HOME}/scripts/arduino-ci-script.sh"
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget http://downloads.arduino.cc/arduino-1.8.5-linux64.tar.xz
+  - tar xf arduino-1.8.5-linux64.tar.xz
+  - sudo mv arduino-1.8.5 /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+# need these for nRF5 (micro::bit)
+  - sudo dpkg --add-architecture i386
+  - sudo apt-get update
+  - sudo apt-get -y install libc6:i386 libstdc++6:i386 libncurses5:i386 libudev1:i386
 
-  # Uncomment the following lines to get verbose output for debugging
-  # 0 (minimum/default) - 2 (maximum) verbosity
-  #- set_script_verbosity 1
-  # Turn on verbose output during compilation
-  #- set_verbose_output_during_compilation "true"
-
-  # Check for library issues that don't affect compilation
-  - set_library_testing "true"
-
-  - set_application_folder "$APPLICATION_FOLDER"
-  - set_sketchbook_folder "$SKETCHBOOK_FOLDER"
-
-  - install_ide "1.8.5"
-
-  - install_package "arduino:avr"
-  - install_package esp8266:esp8266 "http://arduino.esp8266.com/stable/package_esp8266com_index.json"
-
-#  - sudo dpkg --add-architecture i386
-#  - sudo apt-get update
-#  - sudo apt-get -y install libc6:i386 libstdc++6:i386 libncurses5:i386 libudev1:i386
-
-  # install esp32
+install:
+  - ln -s $PWD /usr/local/share/arduino/libraries/DLog
+  - arduino_cmd --pref "compiler.warning_level=all" --save-prefs
+# add extra board urls
+  - arduino_cmd --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json,https://sandeepmistry.github.io/arduino-nRF5/package_nRF5_boards_index.json" --save-prefs
+# install esp8266
+  - arduino_cmd --install-boards esp8266:esp8266
+# install esp32
   - pushd .
-  #- mkdir -p $SKETCHBOOK_FOLDER/hardware/espressif
-  #- cd $SKETCHBOOK_FOLDER/hardware/espressif
-  - git clone https://github.com/espressif/arduino-esp32.git $SKETCHBOOK_FOLDER/hardware/espressif/esp32
-  #- cd esp32
-  - cd $SKETCHBOOK_FOLDER/hardware/espressif/esp32
+  - mkdir -p ~/Arduino/hardware/espressif
+  - cd ~/Arduino/hardware/espressif
+  - git clone https://github.com/espressif/arduino-esp32.git esp32
+  - cd esp32
   - git submodule update --init --recursive
   - cd tools
   - python2 get.py
   - popd
-
-  # install the library (DLog) from repo
-  - install_library
+# install nRF5 boards for micro::bit
+  -  arduino_cmd --install-boards sandeepmistry:nRF5
 
 script:
-  - echo "starting tests"
-  - build_sketch "${SKETCHBOOK_FOLDER}/libraries/DLog/examples" "esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE" "false" "1.8.5"
-  - build_sketch "${SKETCHBOOK_FOLDER}/libraries/DLog/examples" "espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info" "false" "1.8.5"
+  - "echo $PWD"
+  - "echo $HOME"
+  - "ls $PWD"
+  - source $TRAVIS_BUILD_DIR/travis/common.sh
+  - arduino_cmd --board arduino:avr:uno
+  - build_examples
+  - arduino_cmd --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
+  - build_examples
+  - arduino_cmd --board espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info --save-prefs
+  - build_examples
+  - arduino_cmd --board sandeepmistry:nRF5:BBCmicrobit --save-prefs
+  - build_examples
