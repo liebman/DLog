@@ -74,8 +74,17 @@ DLog::~DLog()
 
 void DLog::end()
 {
-    delete _formatter;
-    _formatter = nullptr;
+    if (_formatter != nullptr)
+    {
+        delete _formatter;
+        _formatter = nullptr;
+    }
+
+    if (_writers != nullptr)
+    {
+        delete _writers;
+        _writers = nullptr;
+    }
 }
 
 void DLog::setLevel(DLogLevel level)
