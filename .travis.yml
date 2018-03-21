@@ -22,6 +22,7 @@ before_install:
   - sudo dpkg --add-architecture i386
   - sudo apt-get update
   - sudo apt-get -y install libc6:i386 libstdc++6:i386 libncurses5:i386 libudev1:i386
+  - source $TRAVIS_BUILD_DIR/travis/common.sh
 
 install:
   - ln -s $PWD /usr/local/share/arduino/libraries/DLog
@@ -47,7 +48,6 @@ script:
   - "echo $PWD"
   - "echo $HOME"
   - "ls $PWD"
-  - source $TRAVIS_BUILD_DIR/travis/common.sh
   - arduino_cmd --board arduino:avr:uno
   - build_examples
   - arduino_cmd --board esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE --save-prefs
