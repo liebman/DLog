@@ -38,20 +38,21 @@ before_install:
 #  - sudo apt-get -y install libc6:i386 libstdc++6:i386 libncurses5:i386 libudev1:i386
 
   # install esp32
-  #- pushd .
-  #- mkdir -p ~/Arduino/hardware/espressif
-  #- cd ~/Arduino/hardware/espressif
-  #- git clone https://github.com/espressif/arduino-esp32.git esp32
+  - pushd .
+  #- mkdir -p $SKETCHBOOK_FOLDER/hardware/espressif
+  #- cd $SKETCHBOOK_FOLDER/hardware/espressif
+  - git clone https://github.com/espressif/arduino-esp32.git $SKETCHBOOK_FOLDER/hardware/espressif/esp32
   #- cd esp32
-  #- git submodule update --init --recursive
-  #- cd tools
-  #- python2 get.py
-  #- popd
+  - cd $SKETCHBOOK_FOLDER/hardware/espressif/esp32
+  - git submodule update --init --recursive
+  - cd tools
+  - python2 get.py
+  - popd
 
-  # install the library from repo
+  # install the library (DLog) from repo
   - install_library
-  - echo "install done"
 
 script:
   - echo "starting tests"
   - build_sketch "${SKETCHBOOK_FOLDER}/libraries/DLog/examples" "esp8266:esp8266:generic:CpuFrequency=80,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=4M1M,led=2,LwIPVariant=v2mss536,Debug=Serial,DebugLevel=CORE" "false" "1.8.5"
+  - build_sketch "${SKETCHBOOK_FOLDER}/libraries/DLog/examples" "espressif:esp32:esp32:FlashMode=qio,FlashFreq=80,FlashSize=4M,DebugLevel=info" "false" "1.8.5"
